@@ -4,11 +4,9 @@ import inspect
 import linecache
 import collections
 
-import jinja2
+from debug_toolbar.panels import Panel
 
-from flask_debugtoolbar.panels import DebugPanel
-
-from flask_debugtoolbar_lineprofilerpanel.profile import functions_to_profile
+from .profile import functions_to_profile
 
 def process_line_stats(line_stats):
     "Converts line_profiler.LineStats instance into something more useful"
@@ -37,10 +35,12 @@ def process_line_stats(line_stats):
             line_to_timing[lineno] = (nhits, time)
 
         padded_timings = []
+        total_time = sum([time for _, _, time in timings])
 
         for lineno in range(start_lineno, end_lineno):
             nhits, time = line_to_timing[lineno]
-            padded_timings.append( (lineno, nhits, time) )
+            perc = 100 * (time / total_time)
+            padded_timings.append( (lineno, nhits, time, perc) )
 
         profile_results.append({
             'filename': filename,
@@ -52,34 +52,21 @@ def process_line_stats(line_stats):
                     all_lines[lineno - 1],
                     time * multiplier,
                     nhits,
-                ) for (lineno, nhits, time) in padded_timings
+                    perc,
+                ) for (lineno, nhits, time, perc) in padded_timings
             ],
-            'total_time': sum([time for _, _, time in timings]) * multiplier
+            'total_time': total_time * multiplier
         })
 
     return profile_results
 
-class LineProfilerPanel(DebugPanel):
-    "Panel that displays the result from a line profiler run"
-    name = 'Line Profiler'
+class LineProfilerPanel(Panel):
+    """
+    Panel that displays line profiling information.
+    """
+    title = 'Line Profiler'
 
-    user_activate = True
-
-    def __init__(self, jinja_env, context={}):
-        DebugPanel.__init__(self, jinja_env, context=context)
-
-        self.jinja_env.loader = jinja2.ChoiceLoader([
-            self.jinja_env.loader,
-            jinja2.PrefixLoader({
-                'lineprofiler': jinja2.PackageLoader(__name__, 'templates')
-            })
-        ])
-
-        if functions_to_profile:
-            self.is_active = True
-
-    def has_content(self):
-        return bool(self.profiler)
+    template = 'django_debug_toolbar_rkern_line_profiler/panels/content.html'
 
     def process_request(self, request):
         self.profiler = line_profiler.LineProfiler()
@@ -89,39 +76,13 @@ class LineProfilerPanel(DebugPanel):
 
         self.stats = None
 
-    def process_view(self, request, view_func, view_kwargs):
-        if self.is_active:
-            return functools.partial(self.profiler.runcall, view_func)
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        return self.profiler.runcall(view_func, request, *view_args, **view_kwargs)
 
     def process_response(self, request, response):
-        if not self.is_active:
-            return False
-
         self.stats = self.profiler.get_stats()
 
-        return response
-
-    def title(self):
-        if not self.is_active:
-            return 'Line Profiler Usage Docs'
-
-        return 'Line Profiler'
-
-    def nav_title(self):
-        return 'Line Profiler'
-
-    def nav_subtitle(self):
-        if not self.is_active:
-            return "Click for Usage Docs"
-
-        return '%d function(s)' % len(functions_to_profile)
-
-    def url(self):
-        return ''
-
-    def content(self):
         processed_line_stats = process_line_stats(self.stats)
+        self.record_stats({'stats': processed_line_stats})
 
-        return self.render('lineprofiler/content.html', {
-            'stats': processed_line_stats
-        })
+        return response
