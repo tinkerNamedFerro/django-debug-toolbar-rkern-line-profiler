@@ -4,11 +4,10 @@ Django Debug Toolbar Line Profile Panel (rkern)
 This is a profiling panel for [Django Debug Toolbar](https://github.com/django-debug-toolbar/django-debug-toolbar)
 that uses [rkern/line_profiler](https://github.com/rkern/line_profiler).
 
-This package work slightly differently from [dmclain/django-debug-toolbar-line-profiler](https://github.com/dmclain/django-debug-toolbar-line-profiler)
-which tries line profile the executed view function by default.
-
-This package instead requires you to mark the function you'd like line profile
-with the decorator `@line_profile`.
+This package works slightly differently from [dmclain/django-debug-toolbar-line-profiler](https://github.com/dmclain/django-debug-toolbar-line-profiler)
+which tries to line profile the executed view function by default -- this
+package instead requires you to mark the function you'd like line profile with
+the decorator `@line_profile`.
 
 This makes it easy to line profile functions that are nested deeply in your
 codebase. 
@@ -31,20 +30,19 @@ In your Django settings you need to add `django_debug_toolbar_rkern_line_profile
 to `INSTALLED_APPS` and add `django_debug_toolbar_rkern_line_profiler.panels.LineProfilerPanel`
 to `DEBUG_TOOLBAR_PANELS`
 
+    # settings.py
+    INSTALLED_APPS = [
+        ...
+        'debug_toolbar',
+        'django_debug_toolbar_rkern_line_profiler'
+        ...
+    ]
 
-        # settings.py
-        INSTALLED_APPS = [
-            ...
-            'debug_toolbar',
-            'django_debug_toolbar_rkern_line_profiler'
-            ...
-        ]
-
-        DEBUG_TOOLBAR_PANELS = [
-            ...
-            'django_debug_toolbar_rkern_line_profiler.panels.LineProfilerPanel'
-            ...
-        ]
+    DEBUG_TOOLBAR_PANELS = [
+        ...
+        'django_debug_toolbar_rkern_line_profiler.panels.LineProfilerPanel'
+        ...
+    ]
 
 
 
@@ -66,7 +64,7 @@ either use it as a decorator or directly as a function:
     # Explicit argument
     line_profile(some_function)
 
-In genereal, you'll want the decorator to be the innermost decorator, otherwise
+In general, you'll want the decorator to be the innermost decorator, otherwise
 you'll be profiling the decorator function following `@line_profile`
 
     # WRONG (profiling the `@csrf_exempt` decorator instead of the view function)
