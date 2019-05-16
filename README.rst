@@ -1,22 +1,24 @@
-Line Profile Panel for Flask Debug Toolbar
-==========================================
+Django Debug Toolbar Line Profile Panel (rkern)
+===============================================
 
-.. image:: http://i.imgur.com/d5KaP.png
+This is a profiling panel for [Django Debug Toolbar](https://github.com/django-debug-toolbar/django-debug-toolbar)
+that uses [rkern/line_profiler](https://github.com/rkern/line_profiler).
 
-This is a panel for `flask_debugtoolbar`_ which enables the ability to view 
-line profiling information from selected functions.
-
-The line profile information comes from the `line_profiler`_ module, but you 
-don't need to worry about that.
+This is different from [dmclain/django-debug-toolbar-line-profiler](https://github.com/dmclain/django-debug-toolbar-line-profiler)
 
 Installation
 ------------
 
-First, you need to get the package. Install it with pip:
+Since there's a problem with the latest version fo `line_profiler` (v2.1.1),
+you should first install `line_profiler` (and Cython) like this:
 
-::
+    pip install Cython git+https://github.com/rkern/line_profiler.git
 
-    pip install flask-debugtoolbar-lineprofilerpanel
+(See: <https://github.com/rkern/line_profiler/issues/127>)
+
+Then install this package:
+
+    pip install git+https://github.com/peergradeio/django-debug-toolbar-rkern-line-profiler.git
 
 Somewhere after you've set ``app.debug = True`` and before ``app.run``, you need
 to specify the ``flask_debugtoolbar`` panels that you want to use and include
