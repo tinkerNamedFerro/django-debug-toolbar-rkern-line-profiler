@@ -1,1 +1,1 @@
-recursive-include flask_debugtoolbar_lineprofilerpanel/templates *.html
+recursive-include django_debug_toolbar_rkern_line_profiler/templates *.html

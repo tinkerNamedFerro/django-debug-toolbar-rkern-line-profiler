@@ -90,7 +90,7 @@ from django_debug_toolbar_rkern_line_profiler.profile import line_profile
 
 # Using it as a decorator
 @line_profile
-def profile_page():
+def profile_page(request):
     ...
     return render(request, 'profile_page.html')
 
