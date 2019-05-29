@@ -68,6 +68,12 @@ class LineProfilerPanel(Panel):
 
     template = "django_debug_toolbar_rkern_line_profiler/panels/content.html"
 
+    @property
+    def nav_subtitle(self):
+        stats = self.get_stats()['stats']
+        total_time = sum(r['total_time'] for r in stats)
+        return "Time spent in functions %.2fms" % total_time
+
     def process_request(self, request):
         self.profiler = line_profiler.LineProfiler()
 
