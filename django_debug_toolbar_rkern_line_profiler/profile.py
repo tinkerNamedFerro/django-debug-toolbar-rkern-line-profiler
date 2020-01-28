@@ -1,7 +1,7 @@
 functions_to_profile = []
 
 
-def line_profile(f):
+def line_profile(f, debug=False):
     """The passed function will be included in the line profile displayed by
     the line profiler panel.
 
@@ -16,5 +16,6 @@ def line_profile(f):
         # Explicit argument
         line_profile(some_function)
     """
-    functions_to_profile.append(f)
+    if debug == True:
+    	functions_to_profile.append(f)
     return f
